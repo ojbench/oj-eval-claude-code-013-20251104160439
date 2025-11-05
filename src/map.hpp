@@ -399,8 +399,8 @@ template<
        Node *node = findNode(key);
        if (node != nullptr) return node->data->second;
 
-       T default_value = T();
-       value_type val(key, default_value);
+       // Use the existing insert function which handles the insertion properly
+       value_type val(key, T());
        auto result = insert(val);
        return result.first->second;
    }
@@ -506,7 +506,7 @@ template<
 
        Node *z = pos.node_ptr;
        Node *y = z;
-       Node *x;
+       Node *x = nullptr;
        Color y_original_color = y->color;
 
        if (z->left == nullptr) {
@@ -535,7 +535,7 @@ template<
        delete z;
        node_count--;
 
-       if (y_original_color == BLACK && x != nullptr)
+       if (y_original_color == BLACK)
            deleteFixup(x);
    }
 
@@ -582,6 +582,10 @@ template<
 
    void deleteFixup(Node *x) {
        while (x != root && (x == nullptr || x->color == BLACK)) {
+           if (x == nullptr) {
+               x = root;
+               break;
+           }
            if (x == x->parent->left) {
                Node *w = x->parent->right;
                if (w->color == RED) {
